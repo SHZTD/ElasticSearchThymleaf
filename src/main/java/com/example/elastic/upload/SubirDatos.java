@@ -37,7 +37,7 @@ public class SubirDatos {
 
                     // insertar en Elasticsearch
                     IndexRequest<Map<String, Object>> request = IndexRequest.of(i -> i
-                            .index("logs_server")
+                            .index("logs_server2")
                             .document(logEntry)
                     );
                     client.index(request);

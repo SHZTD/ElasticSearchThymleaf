@@ -1,0 +1,2 @@
+Acceder a LISTA de bases de datos:
+http://localhost:9200/_cat/indices?v
