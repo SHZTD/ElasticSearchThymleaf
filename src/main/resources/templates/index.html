@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Logs Viewer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --success-dark: #059669;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.5;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            background-color: white;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            color: var(--gray-900);
+            background-color: white;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.25rem;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray-100);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-600);
+            background-color: var(--gray-50);
+        }
+
+        tbody tr:hover {
+            background-color: var(--gray-50);
+        }
+
+        .status-cell {
+            font-weight: 500;
+        }
+
+        .status-200 {
+            color: var(--success);
+        }
+
+        .status-300 {
+            color: var(--primary);
+        }
+
+        .status-400, .status-500 {
+            color: #ef4444;
+        }
+
+        .timestamp {
+            white-space: nowrap;
+        }
+
+        .url-cell {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Server Logs</h1>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Filter Logs</h2>
+        </div>
+        <div class="card-body">
+            <form method="get" action="/" class="filter-form">
+                <div class="form-group">
+                    <label for="status">Status Code</label>
+                    <input type="text" name="status" id="status" th:value="${statusFilter}" placeholder="200, 404, 500..."/>
+                </div>
+
+                <div class="form-group">
+                    <label for="ip">IP Address</label>
+                    <input type="text" name="ip" id="ip" th:value="${ipFilter}" placeholder="192.168.1.1"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="method">HTTP Method</label>
+                    <select name="method" id="method">
+                        <option value="" th:selected="${methodFilter == null || methodFilter == ''}">All Methods</option>
+                        <option value="GET" th:selected="${methodFilter == 'GET'}">GET</option>
+                        <option value="POST" th:selected="${methodFilter == 'POST'}">POST</option>
+                        <option value="PUT" th:selected="${methodFilter == 'PUT'}">PUT</option>
+                        <option value="DELETE" th:selected="${methodFilter == 'DELETE'}">DELETE</option>
+                        <option value="PATCH" th:selected="${methodFilter == 'PATCH'}">PATCH</option>
+                        <option value="HEAD" th:selected="${methodFilter == 'HEAD'}">HEAD</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="urlContains">URL Contains</label>
+                    <input type="text" name="urlContains" id="urlContains" th:value="${urlContainsFilter}" placeholder="Search term"/>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Apply Filters</button>
+                    <button type="button" class="btn-secondary" onclick="window.location.href='/'">Clear Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Log Entries</h2>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Method</th>
+                    <th>Timestamp</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th>Size</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="log : ${logs}">
+                    <td th:text="${log[0]}"></td>
+                    <td th:text="${log[1]}"></td>
+                    <td class="timestamp" th:text="${log[2]}"></td>
+                    <td class="url-cell" th:text="${log[3]}" th:title="${log[3]}"></td>
+                    <td class="status-cell" th:classappend="${'status-' + log[4].substring(0,1) + '00'}" th:text="${log[4]}"></td>
+                    <td th:text="${log[5]}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
