@@ -20,7 +20,7 @@ public class VerLogs {
     public List<List<String>> hacerQuery(String esqlQuery) {
         List<List<String>> logs = new ArrayList<>();
 
-        try (RestClient client = RestClient.builder(new HttpHost("localhost", 9200, "http")).build()) {
+        try (RestClient client = RestClient.builder(new HttpHost("172.21.236.117", 9200, "http")).build()) {
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("query", esqlQuery);
 

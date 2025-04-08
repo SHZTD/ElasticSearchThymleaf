@@ -22,7 +22,11 @@ public class QueryController {
             @RequestParam(required = false) String urlContains,
             Model model) {
 
-        StringBuilder query = new StringBuilder("FROM logs_server2 | KEEP ip, method, timestamp, url, status, size");
+        // aqui tenemos la query general
+        StringBuilder query = new StringBuilder(
+        // en SQL seria: SELECT ip, method, timestamp, url, status, size FROM logs_server2
+                "FROM logs_server2 | KEEP ip, method, timestamp, url, status, size"
+        );
 
         List<String> conditions = new ArrayList<>();
 

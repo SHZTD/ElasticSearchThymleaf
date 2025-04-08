@@ -10,7 +10,7 @@ import org.elasticsearch.client.RestClient;
 public class ElasticsearchConnection {
     public static ElasticsearchClient createClient() {
         RestClient restClient = RestClient.builder(
-                new HttpHost("localhost", 9200, "http")
+                new HttpHost("172.21.236.117", 9200, "http")
         ).build();
 
         RestClientTransport transport = new RestClientTransport(
